@@ -160,6 +160,7 @@ $annStmt = $mysqli->prepare(
     "SELECT a.id, a.title, a.message, a.created_at, e.title AS event_title
      FROM event_announcements a
      INNER JOIN bookings b ON b.event_id = a.event_id AND b.user_id = ? AND b.status = 'confirmed'
+     INNER JOIN events e ON e.id = a.event_id
      LEFT JOIN event_announcement_dismissals d ON d.announcement_id = a.id AND d.user_id = ?
      WHERE d.id IS NULL
      ORDER BY a.created_at DESC LIMIT 100"
