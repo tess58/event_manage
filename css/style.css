@@ -941,10 +941,7 @@ body.login-page .page-content {
 }
 
 /* ===== RESPONSIVE DASHBOARD ===== */
-@media (max-width: 940px) {
-    .hero { grid-template-columns: 1fr; }
-    .filter-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 1024px) {
     .dashboard-container {
         grid-template-columns: 1fr;
         position: relative;
@@ -957,12 +954,12 @@ body.login-page .page-content {
     }
     .dashboard-sidebar {
         position: fixed;
-        top: 0;
+        top: 80px;
         left: 0;
         bottom: 0;
-        width: min(300px, 90vw);
-        min-height: 100vh;
-        max-height: 100vh;
+        width: min(280px, 85vw);
+        height: auto;
+        max-height: calc(100vh - 80px);
         overflow-y: auto;
         z-index: 270;
         transform: translateX(-105%);
@@ -988,11 +985,22 @@ body.login-page .page-content {
     .dashboard-container.drawer-open .dashboard-drawer-backdrop {
         display: block;
     }
+}
+
+@media (max-width: 940px) {
+    .hero { grid-template-columns: 1fr; }
+    .filter-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .ticket-card { grid-template-columns: 1fr; }
     body.login-page .page-content { grid-template-columns: 1fr; gap: 20px; }
     .login-hero { padding: 20px; }
     .organizer-main-grid { grid-template-columns: 1fr; }
     .events-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .filter-panel { grid-template-columns: 1fr; }
 }
 .dashboard-drawer-toggle {
     display: none;
