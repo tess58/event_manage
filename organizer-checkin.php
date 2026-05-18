@@ -76,10 +76,9 @@ $rowsStmt->close();
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title><?= sanitize($pageTitle) ?></title>
     <link rel="stylesheet" href="css/style.css">
-    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body>
@@ -123,23 +122,18 @@ $rowsStmt->close();
         </div>
     </main>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (!window.Html5Qrcode) {
-                const cameraStatus = document.getElementById('camera-status');
-                if (cameraStatus) {
-                    cameraStatus.textContent = 'QR camera library failed to load. Use manual ticket entry.';
-                }
-                return;
-            }
+        (function() {
+            let Html5Qrcode = null;
             const target = document.getElementById('ticket_code');
             const startBtn = document.getElementById('start-camera');
             const stopBtn = document.getElementById('stop-camera');
             const cameraStatus = document.getElementById('camera-status');
             const checkinForm = document.querySelector('.form-card form.form-grid');
-            const qr = new Html5Qrcode('qr-reader');
+            let qr = null;
             let cameraRunning = false;
             let lastDecodeAt = 0;
             let submitTimer = null;
+            let libraryLoading = false;
 
             function qrBoxSize() {
                 return Math.min(280, Math.max(160, window.innerWidth - 56));
@@ -154,11 +148,38 @@ $rowsStmt->close();
                     } else {
                         checkinForm.submit();
                     }
-                }, 400);
+                }, 300);
+            }
+
+            async function loadQRLibrary() {
+                if (Html5Qrcode) return true;
+                if (libraryLoading) return false;
+                
+                libraryLoading = true;
+                try {
+                    const script = document.createElement('script');
+                    script.src = 'https://unpkg.com/html5-qrcode@2.2.5';
+                    script.async = true;
+                    script.timeout = 8000;
+                    
+                    await new Promise(function(resolve, reject) {
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    });
+                    
+                    Html5Qrcode = window.Html5Qrcode;
+                    libraryLoading = false;
+                    return true;
+                } catch (err) {
+                    libraryLoading = false;
+                    cameraStatus.textContent = 'Failed to load QR library. Use manual ticket entry.';
+                    return false;
+                }
             }
 
             async function getPreferredCameraId() {
-                if (!Html5Qrcode.getCameras) {
+                if (!Html5Qrcode || !Html5Qrcode.getCameras) {
                     return null;
                 }
                 try {
@@ -166,9 +187,10 @@ $rowsStmt->close();
                     if (!cameras || cameras.length === 0) {
                         return null;
                     }
-                    return (cameras.find(function(c) {
-                        return /back|rear|environment|wide/i.test(c.label || '');
-                    }) || cameras[0]).id;
+                    const rearCamera = cameras.find(function(c) {
+                        return /back|rear|environment|wide|0|main/i.test(c.label || '');
+                    });
+                    return rearCamera ? rearCamera.id : cameras[0].id;
                 } catch (err) {
                     return null;
                 }
@@ -183,61 +205,109 @@ $rowsStmt->close();
                 if (cameraRunning) {
                     return;
                 }
+
+                cameraStatus.textContent = 'Loading camera scanner...';
+                
+                const libraryLoaded = await loadQRLibrary();
+                if (!libraryLoaded) {
+                    return;
+                }
+
                 try {
+                    if (!qr) {
+                        qr = new Html5Qrcode('qr-reader');
+                    }
+
                     cameraStatus.textContent = 'Requesting camera access...';
+                    
                     const scanConfig = {
-                        fps: 10,
+                        fps: 15,
                         qrbox: qrBoxSize(),
-                        aspectRatio: 1
+                        aspectRatio: 1.0
                     };
+                    
                     const onDecoded = function(decodedText) {
                         var now = Date.now();
-                        if (now - lastDecodeAt < 1200) return;
+                        if (now - lastDecodeAt < 800) return;
                         lastDecodeAt = now;
                         if (target) target.value = decodedText;
-                        cameraStatus.textContent = 'QR detected. Submitting check-in…';
+                        cameraStatus.textContent = 'QR detected! Processing...';
                         scheduleAutoSubmit();
                     };
+                    
                     const onError = function() {
-                        cameraStatus.textContent = 'Scanning... point the camera at the QR code.';
+                        // Silent error handling to avoid spam
                     };
+                    
                     const preferredCameraId = await getPreferredCameraId();
-                    const cameraSource = preferredCameraId ? {
-                        deviceId: {
-                            exact: preferredCameraId
-                        }
-                    } : {
-                        facingMode: {
-                            ideal: 'environment'
-                        }
-                    };
+                    
+                    let cameraSource;
+                    if (preferredCameraId) {
+                        cameraSource = {
+                            deviceId: { exact: preferredCameraId }
+                        };
+                    } else {
+                        cameraSource = {
+                            facingMode: { exact: 'environment' }
+                        };
+                    }
+                    
                     await qr.start(cameraSource, scanConfig, onDecoded, onError);
                     cameraRunning = true;
-                    cameraStatus.textContent = 'Camera running (rear preferred). Point at the attendee QR code.';
+                    cameraStatus.textContent = '📷 Rear camera active. Point at QR code to scan.';
                 } catch (err) {
-                    const message = err && err.message ? err.message : '';
-                    cameraStatus.textContent = 'Unable to start camera. Allow access and use HTTPS or localhost.' + (message ? ' ' + message : '');
+                    let errorMsg = 'Unable to access rear camera.';
+                    if (err && err.message) {
+                        if (err.message.includes('NotAllowedError')) {
+                            errorMsg = 'Camera permission denied. Check browser settings.';
+                        } else if (err.message.includes('NotFoundError')) {
+                            errorMsg = 'No camera found on device.';
+                        } else if (err.message.includes('environment')) {
+                            errorMsg = 'Rear camera unavailable. Trying front camera...';
+                            try {
+                                const scanConfig = {
+                                    fps: 15,
+                                    qrbox: qrBoxSize(),
+                                    aspectRatio: 1.0
+                                };
+                                const onDecoded = function(decodedText) {
+                                    var now = Date.now();
+                                    if (now - lastDecodeAt < 800) return;
+                                    lastDecodeAt = now;
+                                    if (target) target.value = decodedText;
+                                    scheduleAutoSubmit();
+                                };
+                                await qr.start({ facingMode: 'user' }, scanConfig, onDecoded, function() {});
+                                cameraRunning = true;
+                                cameraStatus.textContent = '📷 Front camera active. Point at QR code to scan.';
+                                return;
+                            } catch (e) {
+                                errorMsg = 'No camera available.';
+                            }
+                        }
+                    }
+                    cameraStatus.textContent = errorMsg + ' Use manual ticket entry.';
                 }
             }
 
             async function stopCamera() {
-                if (!cameraRunning) {
+                if (!cameraRunning || !qr) {
                     cameraStatus.textContent = 'Camera scanner is idle.';
                     return;
                 }
                 try {
                     await qr.stop();
-                    await qr.clear();
                     cameraRunning = false;
                     cameraStatus.textContent = 'Camera stopped.';
                 } catch (err) {
-                    cameraStatus.textContent = 'Unable to stop camera cleanly.';
+                    cameraStatus.textContent = 'Camera stopped.';
+                    cameraRunning = false;
                 }
             }
 
             if (startBtn) startBtn.addEventListener('click', startCamera);
             if (stopBtn) stopBtn.addEventListener('click', stopCamera);
-        });
+        })();
     </script>
 </body>
 
