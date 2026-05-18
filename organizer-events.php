@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$title || !$description || !$date || !$location || $categoryId <= 0 || !$eventTime) {
             $error = 'Please fill all required fields.';
         } else {
-            $status = 'draft';
+            $status = 'published';
             if (db_has_column($mysqli, 'events', 'price')) {
                 $price = (float) ($_POST['price'] ?? 0);
                 $stmt = $mysqli->prepare("INSERT INTO events (title,description,date,event_time,location,capacity,ticket_type,registration_deadline,price,image_url,category_id,organizer_id,status,lifecycle_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NULL)");
@@ -75,11 +75,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (isset($_POST['duplicate_event'])) {
         $id = (int) ($_POST['event_id'] ?? 0);
         $stmt = $mysqli->prepare("INSERT INTO events (title,description,date,event_time,location,capacity,ticket_type,registration_deadline,image_url,category_id,organizer_id,status,lifecycle_status" . (db_has_column($mysqli, 'events', 'price') ? ",price" : "") . ")
-            SELECT CONCAT(title,' (Copy)'),description,date,event_time,location,capacity,ticket_type,registration_deadline,image_url,category_id,organizer_id,'draft',NULL" . (db_has_column($mysqli, 'events', 'price') ? ",price" : "") . " FROM events WHERE id=? AND organizer_id=?");
+            SELECT CONCAT(title,' (Copy)'),description,date,event_time,location,capacity,ticket_type,registration_deadline,image_url,category_id,organizer_id,'published',NULL" . (db_has_column($mysqli, 'events', 'price') ? ",price" : "") . " FROM events WHERE id=? AND organizer_id=?");
         $stmt->bind_param('ii', $id, $organizerId);
         $stmt->execute();
         $stmt->close();
-        $message = 'Event duplicated as draft.';
+        $message = 'Event duplicated and published.';
     } elseif (isset($_POST['delete_event'])) {
         $id = (int) $_POST['delete_event'];
         $stmt = $mysqli->prepare("DELETE FROM events WHERE id=? AND organizer_id=?");

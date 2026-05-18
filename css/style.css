@@ -511,6 +511,16 @@ section.heading-bar {
 
 .dashboard-drawer-toggle {
     display: none;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    align-items: center;
+    gap: 6px;
 }
 
 .dashboard-header {
