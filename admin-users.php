@@ -126,18 +126,17 @@ if ($selectedUserId > 0) {
 </head>
 <body>
     <header class="site-header" id="site-header">
-        <div class="wrapper header-inner">
-            <a href="index.php" class="brand-logo">Event Ethiopia</a>
-            <button type="button" class="site-nav-toggle button button-alt" id="siteNavToggle" aria-expanded="false" aria-controls="site-main-nav">Menu</button>
-            <nav class="main-nav" id="site-main-nav">
-                <a href="admin-dashboard.php">Dashboard</a>
+        <div class="wrapper header-inner" style="gap: 12px; flex-wrap: wrap;">
+            <a href="index.php" class="brand-logo" style="margin-right: auto;">Event Ethiopia</a>
+            <div class="dashboard-header-actions">
+                <a href="admin-dashboard.php" class="button button-alt">Dashboard</a>
                 <a href="logout.php" class="button button-alt">Logout</a>
-            </nav>
+                <button type="button" class="dashboard-drawer-toggle button">Menu</button>
+            </div>
         </div>
     </header>
     <main class="page-content wrapper">
         <div class="dashboard-container" id="dashboard-root">
-            <button type="button" class="dashboard-drawer-toggle button button-alt" aria-expanded="false" aria-controls="dashboard-sidebar-nav">Menu</button>
             <aside class="dashboard-sidebar" id="dashboard-sidebar-nav">
                 <h3>Admin Panel</h3>
                 <nav class="sidebar-nav">

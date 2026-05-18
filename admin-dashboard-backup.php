@@ -1,10 +1,11 @@
 <?php
 require_once 'includes/config.php';
-// require_login();
-// if (!is_role('admin')) {
-//     header('Location: login.php');
-//     exit;
-// }
+require_login();
+
+if (!is_role('admin')) {
+    header('Location: login.php');
+    exit;
+}
 
 $pageTitle = 'Admin Dashboard | Event Ethiopia';
 $hasEventPrice = db_has_column($mysqli, 'events', 'price');
@@ -105,6 +106,8 @@ $categoryStmt->close();
         <div class="wrapper header-inner" style="gap: 12px; flex-wrap: wrap;">
             <a href="index.php" class="brand-logo" style="margin-right: auto;">Event Ethiopia</a>
             <div class="dashboard-header-actions">
+                <a href="admin-dashboard.php" class="button button-alt">Dashboard</a>
+                <a href="logout.php" class="button button-alt">Logout</a>
                 <button type="button" class="dashboard-drawer-toggle button">Menu</button>
             </div>
         </div>

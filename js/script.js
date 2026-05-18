@@ -16,10 +16,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     document.querySelectorAll('.dashboard-container').forEach(function (container) {
-        const toggle = container.querySelector('.dashboard-drawer-toggle');
-        if (!toggle) {
-            return;
-        }
         let backdrop = container.querySelector('.dashboard-drawer-backdrop');
         if (!backdrop) {
             backdrop = document.createElement('div');
@@ -27,20 +23,29 @@ document.addEventListener('DOMContentLoaded', function () {
             backdrop.setAttribute('aria-hidden', 'true');
             container.insertBefore(backdrop, container.firstChild);
         }
+        
         function setOpen(open) {
             container.classList.toggle('drawer-open', open);
-            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
             document.body.classList.toggle('dashboard-drawer-active', open);
         }
-        toggle.addEventListener('click', function () {
-            setOpen(!container.classList.contains('drawer-open'));
-        });
+        
+        // Listen to the top-right dashboard drawer toggle button
+        const topToggle = document.querySelector('.dashboard-drawer-toggle');
+        if (topToggle) {
+            topToggle.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                setOpen(!container.classList.contains('drawer-open'));
+            });
+        }
+        
         backdrop.addEventListener('click', function () {
             setOpen(false);
         });
+        
         container.querySelectorAll('.dashboard-sidebar a').forEach(function (a) {
             a.addEventListener('click', function () {
-                if (window.matchMedia('(max-width: 940px)').matches) {
+                if (window.matchMedia('(max-width: 1025px)').matches) {
                     setOpen(false);
                 }
             });

@@ -225,7 +225,6 @@ include 'includes/header.php';
 <?php if ($message): ?><div class="alert alert-success"><?= sanitize($message) ?></div><?php endif; ?>
 <?php if ($error): ?><div class="alert alert-error"><?= sanitize($error) ?></div><?php endif; ?>
 <div class="dashboard-container" id="dashboard-root">
-<button type="button" class="dashboard-drawer-toggle button button-alt" aria-expanded="false" aria-controls="dashboard-sidebar-nav">Menu</button>
 <aside class="dashboard-sidebar" id="dashboard-sidebar-nav"><h3><?= sanitize($user['name']) ?></h3><nav class="sidebar-nav"><?php foreach ($allowedTabs as $item): ?><a href="user-dashboard.php?tab=<?= $item ?>" class="<?= $tab === $item ? 'active' : '' ?>"><?= ucfirst($item) ?><?php if ($item === 'notifications'): ?><span class="sidebar-badge" data-notification-badge data-count="<?= (int) $unreadCount ?>"><?= $unreadCount > 0 ? ' ('.$unreadCount.')' : '' ?></span><?php endif; ?></a><?php endforeach; ?><a href="logout.php">Logout</a></nav></aside>
 <section class="dashboard-content">
 <?php if ($tab === 'dashboard'): ?>

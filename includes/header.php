@@ -18,7 +18,23 @@ if (!isset($pageTitle)) {
 </head>
 
 <body>
+<?php
+$isDashboard = strpos($_SERVER['PHP_SELF'], 'user-dashboard.php') !== false || strpos($_SERVER['PHP_SELF'], 'organizer-dashboard.php') !== false || strpos($_SERVER['PHP_SELF'], 'admin-') !== false;
+$dashUrl = 'user-dashboard.php';
+if (function_exists('is_role')) {
+    if (is_role('admin')) $dashUrl = 'admin-dashboard.php';
+    elseif (is_role('organizer')) $dashUrl = 'organizer-dashboard.php';
+}
+?>
     <header class="site-header" id="site-header">
+        <?php if ($isDashboard): ?>
+        <div class="wrapper header-inner" style="gap: 12px; flex-wrap: wrap;">
+            <a href="index.php" class="brand-logo" style="margin-right: auto;">Event Ethiopia</a>
+            <div class="dashboard-header-actions">
+                <button type="button" class="dashboard-drawer-toggle button">Menu</button>
+            </div>
+        </div>
+        <?php else: ?>
         <div class="wrapper header-inner">
             <a href="index.php" class="brand-logo">✦ Event Ethiopia</a>
             <button type="button" class="site-nav-toggle button button-alt" id="siteNavToggle" aria-expanded="false" aria-controls="site-main-nav">Menu</button>
@@ -41,5 +57,6 @@ if (!isset($pageTitle)) {
                 <button id="themeToggle" class="button button-alt theme-toggle" type="button" aria-label="Toggle dark mode">🌙</button>
             </nav>
         </div>
+        <?php endif; ?>
     </header>
     <main class="page-content wrapper">
