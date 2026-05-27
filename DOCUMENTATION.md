@@ -133,6 +133,8 @@ The database is structured around five primary entities with the following relat
 - booking_date (TIMESTAMP)
 - status (ENUM: 'confirmed', 'cancelled', 'attended')
 - ticket_number (VARCHAR)
+- qr_code (VARCHAR, nullable)
+- check_in_time (TIMESTAMP, nullable)
 - payment_status (ENUM: 'pending', 'completed', 'failed')
 ```
 
@@ -277,6 +279,14 @@ Personalized dashboard for logged-in users (role-based):
 - Manage event status
 - Archive completed events
 
+#### Event Check-In Scanner
+- QR code scanner for attendee check-in
+- Real-time attendance tracking
+- Display attendee information upon scanning
+- Confirm attendance status
+- Generate QR code reports
+- View check-in history per event
+
 ---
 
 ## 6. Role-Based Features
@@ -319,12 +329,22 @@ Personalized dashboard for logged-in users (role-based):
 - Manage event status (upcoming, ongoing, completed, cancelled)
 - Update event details as needed
 - Archive completed events
+- Generate QR codes for event tickets
+- Track check-in status for attendees
+
+**Attendance Management:**
+- Scan QR codes for event check-in
+- View real-time attendance tracking
+- Mark attendees as present using scanner
+- Generate attendance reports
+- Export attendance data
 
 **Analytics:**
 - View booking statistics
 - Monitor attendance rates
 - Track registration trends
 - Generate event performance reports
+- Analyze attendance vs. booking ratio
 
 ### Attendee Role Features
 
@@ -475,8 +495,10 @@ Contains the site footer and closing HTML tags included on all pages.
 - Booking cancellation
 - Booking status tracking (confirmed, cancelled, attended)
 - Ticket generation and numbering
+- QR code generation for event tickets
 - Payment status tracking
 - Capacity enforcement
+- Digital ticket with QR code for mobile access
 
 ### Reviews and Ratings
 - Five-star rating system
@@ -503,6 +525,8 @@ Contains the site footer and closing HTML tags included on all pages.
 - Pagination for list views
 - Form validation and error handling
 - Success and error messages
+- QR code scanner interface for check-in
+- QR code display for ticket viewing
 
 ### Real-Time Features
 - AJAX-based event searching and filtering
@@ -517,6 +541,9 @@ Contains the site footer and closing HTML tags included on all pages.
 - CSRF token implementation
 - Session timeout handling
 - Error logging and debugging
+- QR code generation using PHP libraries
+- QR code decoding and validation
+- Secure ticket number encryption in QR codes
 
 ---
 
@@ -573,6 +600,16 @@ When documenting the system visually, capture screenshots of the following pages
 **Purpose:** Show dark mode implementation
 **Key Elements:** Dark theme colors, toggled element styles
 **Description:** Captures the dark mode toggle feature and its visual appearance.
+
+### Page 11: Event Check-In Scanner (Organizer View)
+**Purpose:** Display QR code scanning interface
+**Key Elements:** QR code scanner, attendance tracking, real-time updates
+**Description:** Shows how organizers use the scanner to check-in attendees using QR codes.
+
+### Page 12: Ticket with QR Code (Attendee View)
+**Purpose:** Show ticket display with QR code
+**Key Elements:** QR code, ticket information, booking details
+**Description:** Demonstrates the digital ticket with embedded QR code for event access.
 
 ---
 
@@ -669,8 +706,8 @@ The implementation demonstrates best practices in web development including data
 1. **Payment Integration** - Integrate payment gateways (Stripe, PayPal) for online event registration fees
 2. **Email Notifications** - Send automated email confirmations, reminders, and updates to users
 3. **Event Analytics** - Provide detailed analytics for organizers on attendance, demographics, and trends
-4. **QR Code Tickets** - Generate QR codes for event tickets with check-in functionality
-5. **Event Calendar Integration** - Allow users to export event dates to Google Calendar, Outlook, etc.
+4. **Event Calendar Integration** - Allow users to export event dates to Google Calendar, Outlook, etc.
+5. **Advanced QR Code Features** - Implement QR code expiration, bulk generation, and analytics tracking
 
 #### User Experience Enhancements
 6. **Advanced Search** - Implement full-text search with autocomplete suggestions
